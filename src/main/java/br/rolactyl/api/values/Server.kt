@@ -66,8 +66,8 @@ class Server : AbstractRest() {
 
     enum class Status(val status : String) {
         ONLINE("Online"),
-        OFFLINE("offline")
-
+        OFFLINE("offline"),
+        DESLIGADO("offline")
     }
 
     companion object {
