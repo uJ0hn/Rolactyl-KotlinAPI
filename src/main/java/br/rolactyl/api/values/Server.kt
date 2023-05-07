@@ -21,6 +21,10 @@ class Server : AbstractRest() {
         return jsonObject!!["port"] as Long
     }
 
+    fun getStatus() : Status {
+        return Status.valueOf(jsonObject!!["status"].toString().uppercase())
+    }
+
     fun getIp() : String {
         return jsonObject!!["ip"].toString()
     }
@@ -58,6 +62,12 @@ class Server : AbstractRest() {
     enum class Type(val type : String) {
         SPIGOT("spigot"),
         BUNGEE("bungee")
+    }
+
+    enum class Status(val status : String) {
+        ONLINE("Online"),
+        OFFLINE("offline")
+
     }
 
     companion object {

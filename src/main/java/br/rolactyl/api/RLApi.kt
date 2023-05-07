@@ -39,20 +39,7 @@ class RLApi {
         @JvmStatic
         fun main(args :Array<String>) {
             val api = RLBuilder("http://localhost:8080", "fdgtr6hr6rfghrhfghfth").build()
-            api.createUser()
-                .setName("xerequinha")
-                .setEmail("xerequinha@gmail.com")
-                .setPassword("xerequinha")
-                .isAdmin(false)
-                .complete()
-            Timer().schedule(250L) {
-                api.createServer()
-                    .setName("Xereca")
-                    .setOwner(api.getUser("xerequinha").queue()!!)
-                    .setNode(api.getNode(1).queue()!!)
-                    .setRam(1024)
-                    .complete()
-            }
+            println(api.getServer("JOiLn").queue()!!.getStatus().status)
         }
     }
 
