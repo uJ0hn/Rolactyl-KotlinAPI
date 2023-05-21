@@ -57,8 +57,8 @@ class Server : AbstractRest() {
         START("start"),
         STOP("stop"),
         KILL("kill")
-
     }
+
     enum class Type(val type : String) {
         SPIGOT("spigot"),
         BUNGEE("bungee")
@@ -70,6 +70,13 @@ class Server : AbstractRest() {
         DESLIGADO("offline"),
         LIGADO("online")
     }
+
+    enum class Java(val int: Int) {
+        JAVA8(8),
+        JAVA11(11),
+        JAVA17(17)
+    }
+
 
     companion object {
     }

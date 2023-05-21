@@ -4,25 +4,27 @@ import br.rolactyl.api.throws.InvalidException
 import br.rolactyl.api.utils.AbstractRest
 import br.rolactyl.api.utils.RestAction
 import br.rolactyl.api.values.*
+import br.rolactyl.api.values.actions.CreateServer
+import br.rolactyl.api.values.actions.CreateUser
 import okhttp3.FormBody
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
 import org.json.simple.JSONObject
-import java.util.Timer
-import kotlin.concurrent.schedule
 
-class RLApi {
+class RLApi(private var url : String,private val token : String) {
+
+
 
     init {
-        if(RLBuilder.url.endsWith("/")) RLBuilder.url.dropLast(1)
-        RLBuilder.url += "/api/v1"
+        if(url.endsWith("/")) url.dropLast(1)
+        url += "/api/v1"
         val client = OkHttpClient()
         val build = FormBody.Builder()
         val requestBody = build.build()
         val request = Request.Builder()
-            .url(RLBuilder.url)
-            .addHeader("Authorization", "Bearer ${RLBuilder.token}")
+            .url(url)
+            .addHeader("Authorization", "Bearer ${token}")
             .post(requestBody)
             .build()
 
@@ -38,8 +40,16 @@ class RLApi {
     companion object {
         @JvmStatic
         fun main(args :Array<String>) {
-            val api = RLBuilder("http://localhost:8080", "fdgtr6hr6rfghrhfghfth").build()
-            println(api.getServer("JOiLn").queue()!!.getStatus().status)
+            val api = RLApi("http://168.75.110.133:8080", "uirrj5mCc4LhXga")
+            val server = api.createServer().setName("Murillinho")
+                .setNode(api.getNode(2).queue()!!)
+                .setOwner(api.getUser("admin").queue()!!)
+                .setJava(Server.Java.JAVA11)
+                .setRam(4096)
+                .setMySQL(false)
+                .setType(Server.Type.BUNGEE)
+                .complete()
+            println(server.queue()!!.getName())
         }
     }
 
@@ -47,30 +57,33 @@ class RLApi {
         val j = JSONObject()
         j["action"] = "getuser"
         j["user"] = user
-        return RestAction(this, j) { User() }
+        return RestAction(url, token, this, j) { User() }
     }
 
     fun createServer() : CreateServer {
-        return CreateServer()
+        val createServer = CreateServer(url, token)
+        createServer.api = this
+        return createServer
     }
 
     fun createUser() : CreateUser {
-        return CreateUser()
+        val cu = CreateUser(url, token)
+        cu.api = this
+        return cu
     }
 
     fun getServer(id : String) : RestAction<Server> {
         val j = JSONObject()
         j["action"] = "getserver"
         j["id"] = id
-        return RestAction(this, j) {Server()}
+        return RestAction(url, token, this, j) {Server()}
     }
 
     fun getNode(id : Int) : RestAction<Node> {
         val j = JSONObject()
         j["action"] = "getnode"
         j["id"] = id
-        return RestAction(this, j) { Node() }
+        return RestAction(url, token, this, j) { Node() }
     }
-
-
+    
 }

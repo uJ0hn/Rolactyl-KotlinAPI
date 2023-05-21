@@ -1,16 +1,16 @@
 package br.rolactyl.api.utils
 
 import br.rolactyl.api.RLApi
-import br.rolactyl.api.RLBuilder
 import br.rolactyl.api.throws.InvalidException
-import okhttp3.FormBody
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import okhttp3.Response
+import okhttp3.*
 import org.json.simple.JSONObject
 import java.lang.reflect.ParameterizedType
 
-class RestAction<T : AbstractRest>(val api : RLApi, val jsonObject: JSONObject ,private val apiConstructor: () -> T) {
+class RestAction<T : AbstractRest>(private val url: String,
+                                   private val token : String,
+                                    private val api : RLApi,
+                                   private val jsonObject: JSONObject,
+                                   private val apiConstructor: () -> T) {
 
 
     fun queue(): T? {
@@ -22,8 +22,8 @@ class RestAction<T : AbstractRest>(val api : RLApi, val jsonObject: JSONObject ,
         }
         val requestBody = build.build()
         val request = Request.Builder()
-            .url(RLBuilder.url)
-            .addHeader("Authorization", "Bearer ${RLBuilder.token}")
+            .url(url)
+            .addHeader("Authorization", "Bearer $token")
             .post(requestBody)
             .build()
 

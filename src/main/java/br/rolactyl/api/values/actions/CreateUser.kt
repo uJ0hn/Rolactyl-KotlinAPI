@@ -1,15 +1,13 @@
-package br.rolactyl.api.values
+package br.rolactyl.api.values.actions
 
-import br.rolactyl.api.RLBuilder
 import br.rolactyl.api.throws.InvalidException
 import br.rolactyl.api.utils.AbstractRest
-import okhttp3.FormBody
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import okhttp3.Response
+import br.rolactyl.api.utils.RestAction
+import br.rolactyl.api.values.User
+import okhttp3.*
 import org.json.simple.JSONObject
 
-class CreateUser {
+class CreateUser(private val url: String,private val token: String ) : AbstractRest(){
 
     private val json = JSONObject()
 
@@ -18,23 +16,23 @@ class CreateUser {
         return this
     }
 
-    fun setEmail(email: String) : CreateUser{
+    fun setEmail(email: String) : CreateUser {
         json["email"] = email
         return this
     }
 
-    fun setPassword(password: String) : CreateUser{
+    fun setPassword(password: String) : CreateUser {
         json["password"] = password
         return this
     }
 
-    fun isAdmin(i: Boolean) : CreateUser{
+    fun isAdmin(i: Boolean) : CreateUser {
         val a = if(i) 1 else 2
         json["admin"] = a
         return this
     }
 
-    fun complete() {
+    fun complete() : RestAction<User>{
         val client = OkHttpClient()
         val build = FormBody.Builder()
         for(v in json) {
@@ -43,17 +41,19 @@ class CreateUser {
         build.add("action", "usercreate")
         val requestBody = build.build()
         val request = Request.Builder()
-            .url(RLBuilder.url)
-            .addHeader("Authorization", "Bearer ${RLBuilder.token}")
+            .url(url)
+            .addHeader("Authorization", "Bearer $token")
             .post(requestBody)
             .build()
 
         val response : Response = client.newCall(request).execute()
         val a = response.body.string()
-        val json = AbstractRest.parse(a)!!
-        if(json["error"] != "null") {
-            throw InvalidException(json["error"].toString())
+        val b = parse(a)!!
+        if(b["error"] != "null") {
+            throw InvalidException(b["error"].toString())
         }
+
+        return api.getUser(json["name"].toString())
     }
 
 

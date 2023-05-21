@@ -1,15 +1,15 @@
-package br.rolactyl.api.values
+package br.rolactyl.api.values.actions
 
-import br.rolactyl.api.RLBuilder
 import br.rolactyl.api.throws.InvalidException
 import br.rolactyl.api.utils.AbstractRest
-import okhttp3.FormBody
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import okhttp3.Response
+import br.rolactyl.api.utils.RestAction
+import br.rolactyl.api.values.Node
+import br.rolactyl.api.values.Server
+import br.rolactyl.api.values.User
+import okhttp3.*
 import org.json.simple.JSONObject
 
-class CreateServer : AbstractRest() {
+class CreateServer(private val url: String, private val token: String) : AbstractRest() {
 
     private val json = JSONObject()
 
@@ -38,12 +38,22 @@ class CreateServer : AbstractRest() {
         return this
     }
 
-    fun setPort(port : Int) : CreateServer{
+    fun setPort(port : Int) : CreateServer {
         json["port"] = port
         return this
     }
 
-    fun complete() {
+    fun setJava(java: Server.Java) : CreateServer {
+        json["java"] = java.int
+        return this
+    }
+
+    fun setMySQL(boolean: Boolean): CreateServer {
+        json["mysql"] = boolean.toString()
+        return this
+    }
+
+    fun complete(): RestAction<Server> {
         val client = OkHttpClient()
         val build = FormBody.Builder()
         for(v in json) {
@@ -52,17 +62,19 @@ class CreateServer : AbstractRest() {
         build.add("action", "createserver")
         val requestBody = build.build()
         val request = Request.Builder()
-            .url(RLBuilder.url)
-            .addHeader("Authorization", "Bearer ${RLBuilder.token}")
+            .url(url)
+            .addHeader("Authorization", "Bearer $token")
             .post(requestBody)
             .build()
 
         val response : Response = client.newCall(request).execute()
         val a = response.body.string()
         val json = parse(a)!!
-        if(json["error"] != "null") {
+        if(json["error"] != "null" && json["error"].toString().length != 5) {
             throw InvalidException(json["error"].toString())
         }
+
+        return api.getServer(json["error"].toString())
     }
 
 
