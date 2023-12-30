@@ -21,12 +21,15 @@ class RestAction<T : AbstractRest>(private val url: String,
             build.add(v.key.toString(), v.value.toString())
         }
         val requestBody = build.build()
-        val request = Request.Builder()
+        val request1 = Request.Builder()
             .url(url)
             .addHeader("Authorization", "Bearer $token")
-            .post(requestBody)
-            .build()
+            .get()
 
+        for(v in jsonObject) {
+            request1.addHeader(v.key.toString(), v.value.toString())
+        }
+        val request = request1.build()
         val response : Response = client.newCall(request).execute()
         val a = response.body.string()
         val json = AbstractRest.parse(a)!!
@@ -34,9 +37,6 @@ class RestAction<T : AbstractRest>(private val url: String,
             println(json["error"])
             return null
         }
-
-
-
         val api = apiConstructor()
         api.jsonObject = json
         api.api = this.api

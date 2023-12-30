@@ -55,26 +55,27 @@ class CreateServer(private val url: String, private val token: String) : Abstrac
 
     fun complete(): RestAction<Server> {
         val client = OkHttpClient()
-        val build = FormBody.Builder()
-        for(v in json) {
-            build.add(v.key.toString(), v.value.toString())
-        }
-        build.add("action", "createserver")
-        val requestBody = build.build()
-        val request = Request.Builder()
+
+        val request1 = Request.Builder()
             .url(url)
             .addHeader("Authorization", "Bearer $token")
-            .post(requestBody)
-            .build()
+            .addHeader("action", "createserver")
+            .get()
+
+        for(v in json) {
+            request1.addHeader(v.key.toString(), v.value.toString())
+
+        }
+        val request = request1.build()
 
         val response : Response = client.newCall(request).execute()
         val a = response.body.string()
         val json = parse(a)!!
-        if(json["error"] != "null" && json["error"].toString().length != 5) {
+        if(json["error"] != "null" && json["error"].toString().split("_")[0] != "success") {
             throw InvalidException(json["error"].toString())
         }
 
-        return api.getServer(json["error"].toString())
+        return api.getServer(json["error"].toString().split("_")[1])
     }
 
 

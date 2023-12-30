@@ -1,8 +1,9 @@
 package br.rolactyl.api.values
 
 import br.rolactyl.api.utils.AbstractRest
+import br.rolactyl.api.values.actions.ChangeUserPass
 
-class User : AbstractRest() {
+class User(private val token: String, private val url: String) : AbstractRest() {
 
     fun getName() : String{
         return jsonObject!!["name"].toString()
@@ -26,6 +27,14 @@ class User : AbstractRest() {
 
     fun getAtualToken() : String {
         return jsonObject!!["token"].toString()
+    }
+
+    fun changeUserPass(newpass: String) : User {
+        ChangeUserPass(url, token)
+            .username(this)
+            .newpassword(newpass)
+            .complete()
+        return this
     }
 
 

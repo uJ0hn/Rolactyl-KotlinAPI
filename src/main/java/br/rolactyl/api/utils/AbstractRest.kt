@@ -33,17 +33,15 @@ abstract class AbstractRest {
         fun sendAction(url : String, params: JSONObject) : String {
             val client = OkHttpClient()
 
-            val build = FormBody.Builder()
+            val a = Request.Builder()
+                .url(url)
+                .get()
+
             for(p in params) {
-                build.add(p.key.toString(), p.value.toString())
+                a.addHeader(p.key.toString(), p.value.toString())
             }
 
-            val requestBody = build.build()
-
-            val request = Request.Builder()
-                .url(url)
-                .post(requestBody)
-                .build()
+            val request = a.build()
 
             val response = client.newCall(request).execute()
             return response.body.string()

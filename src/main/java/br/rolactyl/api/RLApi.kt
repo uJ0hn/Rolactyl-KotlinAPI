@@ -25,10 +25,11 @@ class RLApi(private var url : String,private val token : String) {
         val request = Request.Builder()
             .url(url)
             .addHeader("Authorization", "Bearer ${token}")
-            .post(requestBody)
+            .get()
             .build()
 
         val response : Response = client.newCall(request).execute()
+        println(response)
         val json = AbstractRest.parse(response.body.string())!!
         if(json["error"] != "null") {
             throw InvalidException(json["error"].toString())
@@ -40,16 +41,7 @@ class RLApi(private var url : String,private val token : String) {
     companion object {
         @JvmStatic
         fun main(args :Array<String>) {
-            val api = RLApi("http://168.75.110.133:8080", "uirrj5mCc4LhXga")
-            val server = api.createServer().setName("Murillinho")
-                .setNode(api.getNode(2).queue()!!)
-                .setOwner(api.getUser("admin").queue()!!)
-                .setJava(Server.Java.JAVA11)
-                .setRam(4096)
-                .setMySQL(false)
-                .setType(Server.Type.BUNGEE)
-                .complete()
-            println(server.queue()!!.getName())
+            val api = RLApi("http://localhost:8080", "bSdY2VXRd3Xcjuo")
         }
     }
 
@@ -57,7 +49,7 @@ class RLApi(private var url : String,private val token : String) {
         val j = JSONObject()
         j["action"] = "getuser"
         j["user"] = user
-        return RestAction(url, token, this, j) { User() }
+        return RestAction(url, token, this, j) { User(token, url) }
     }
 
     fun createServer() : CreateServer {

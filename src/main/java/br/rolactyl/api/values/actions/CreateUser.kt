@@ -16,7 +16,15 @@ class CreateUser(private val url: String,private val token: String ) : AbstractR
         return this
     }
 
+
+    private fun isEmailValid(email: String): Boolean {
+        val emailRegex = Regex("^\\S+@\\S+\\.\\S+\$") // Regex para verificar o formato básico de um email
+
+        return emailRegex.matches(email)
+    }
+
     fun setEmail(email: String) : CreateUser {
+        if(!isEmailValid(email)) throw InvalidException("O email do novo usuario precisa ser valido!")
         json["email"] = email
         return this
     }
@@ -34,17 +42,18 @@ class CreateUser(private val url: String,private val token: String ) : AbstractR
 
     fun complete() : RestAction<User>{
         val client = OkHttpClient()
-        val build = FormBody.Builder()
-        for(v in json) {
-            build.add(v.key.toString(), v.value.toString())
-        }
-        build.add("action", "usercreate")
-        val requestBody = build.build()
-        val request = Request.Builder()
+
+        val request1 = Request.Builder()
             .url(url)
             .addHeader("Authorization", "Bearer $token")
-            .post(requestBody)
-            .build()
+            .addHeader("action", "usercreate")
+            .get()
+
+        for(v in json) {
+            request1.addHeader(v.key.toString(), v.value.toString())
+        }
+
+        val request = request1.build()
 
         val response : Response = client.newCall(request).execute()
         val a = response.body.string()
